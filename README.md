@@ -1,4 +1,4 @@
-### Simple CLI Chat Application
+# Simple CLI Chat Application
 
 This project is comprises of both client and server implementations for a simple chat application.
 Both the ends are designed using Java and sockets to communicate.
