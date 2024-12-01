@@ -3,18 +3,20 @@ package SimpleChatApp.Server;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.logging.*;
 
 public class UserThread extends Thread {
     private Socket socket;
-    private ChatServer server;
     private PrintWriter writer;
-    private Set<String> userNames;
-    private Set<UserThread> userThreads;
+    private final Set<String> userNames;
+    private final Set<UserThread> userThreads;
+    private final Logger logger;
 
-    public UserThread(Socket socket, Set<String> userNames, Set<UserThread> userThreads) {
+    public UserThread(Socket socket, Set<String> userNames, Set<UserThread> userThreads, Logger logger) {
         this.socket = socket;
         this.userNames = userNames;
         this.userThreads = userThreads;
+        this.logger = logger;
     }
 
     @Override
@@ -35,7 +37,6 @@ public class UserThread extends Thread {
             broadcast(serverMessage);
 
             String clientMessage;
-
             do {
                 clientMessage = reader.readLine();
                 serverMessage = "[" + userName + "]: " + clientMessage;
@@ -50,8 +51,8 @@ public class UserThread extends Thread {
             broadcast(serverMessage);
 
         } catch (IOException ex) {
-            System.out.println("Error in UserThread: " + ex.getMessage());
-            ex.printStackTrace();
+            logger.log(Level.SEVERE, "IO Error Occured", ex);
+            System.out.println("IO Error Occured: " + ex.getMessage());
         }
     }
 
