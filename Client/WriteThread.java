@@ -27,16 +27,14 @@ public class WriteThread extends Thread {
         String userName = console.readLine("\nEnter your name: ").trim();
         client.setUserName(userName);
         writer.println(userName);
-        System.out.println();
 
         String text;
         do {
-            text = console.readLine("[ " + userName + " ]: ").trim();
-
-            if(!text.isEmpty()) {
-                writer.println(text);
-            }
-
+            text = console.readLine("[ "+ userName +" ]: ");
+            
+            if(text.trim().isEmpty()) continue;
+            
+            writer.println(text);
         } while (!text.equals("bye"));
 
         try {

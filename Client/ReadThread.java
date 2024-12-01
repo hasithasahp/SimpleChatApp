@@ -24,15 +24,19 @@ public class ReadThread extends Thread {
     public void run() {
         while (true) {
             try {
-                String response = reader.readLine();
-                System.out.println("\n" + response);
+                String response = reader.readLine().trim();
+                if(response.isEmpty()) continue;
+
+                // Erase the current line and move to the beginning
+                System.out.print("\r");
+                System.out.println(response);
 
                 if (client.getUserName() != null) {
                     System.out.print("[ " + client.getUserName() + " ]: ");
                 }
             } catch (IOException ex) {
                 if(ex instanceof SocketException) {
-                    System.out.println("\nConnection Closed: " +ex.getMessage());
+                    System.out.println("\nConnection Closed: " + ex.getMessage());
                 } else {
                     System.out.println("\nError reading from server: " + ex.getMessage());
                 }

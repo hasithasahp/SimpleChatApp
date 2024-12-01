@@ -39,12 +39,14 @@ public class UserThread extends Thread {
 
             String clientMessage;
             do {
-                clientMessage = reader.readLine().trim();
+                clientMessage = reader.readLine();
+                if(clientMessage == null) break; // client disconnected
+
+                clientMessage = clientMessage.trim();
                 if(!clientMessage.isEmpty()) {
                     serverMessage = "[ " + userName + " ]: " + clientMessage;
                     broadcast(serverMessage);
                 }
-
             } while (!clientMessage.equals("bye"));
 
             removeUser(userName);
