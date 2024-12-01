@@ -43,7 +43,7 @@ public class ChatServer {
 
             while (true) {
                 Socket socket = serverSocket.accept();
-                System.out.println("New user connected");
+                System.out.println("["+ socket.getInetAddress().getHostAddress() + ":" + socket.getPort() +"] New user connected");
 
                 UserThread newUser = new UserThread(socket, userNames, userThreads, logger);
                 userThreads.add(newUser);

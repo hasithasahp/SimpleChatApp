@@ -31,17 +31,19 @@ public class UserThread extends Thread {
 
             printUsers();
 
-            userName = reader.readLine();
+            userName = reader.readLine().trim();
             userNames.add(userName);
 
-            String serverMessage = "New user connected: " + userName;
+            String serverMessage = "\nNew user connected: " + userName + "\n";
             broadcast(serverMessage);
 
             String clientMessage;
             do {
-                clientMessage = reader.readLine();
-                serverMessage = "[" + userName + "]: " + clientMessage;
-                broadcast(serverMessage);
+                clientMessage = reader.readLine().trim();
+                if(!clientMessage.isEmpty()) {
+                    serverMessage = "[ " + userName + " ]: " + clientMessage;
+                    broadcast(serverMessage);
+                }
 
             } while (!clientMessage.equals("bye"));
 
@@ -65,6 +67,7 @@ public class UserThread extends Thread {
 
             try {
                 socket.close();
+                System.out.println("Connection Closed to " + userName);
             } catch (IOException e) {
                 logger.log(Level.SEVERE, "Error closing socket", e);
             }
