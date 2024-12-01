@@ -4,9 +4,11 @@ import java.io.*;
 import java.net.*;
 
 public class ChatClient {
-    private String hostname;
-    private int port;
+    private String hostname = "localhost";
+    private int port = 5555;
     private String userName;
+
+    public ChatClient() {}
 
     public ChatClient(String hostname, int port) {
         this.hostname = hostname;
@@ -36,12 +38,18 @@ public class ChatClient {
     }
 
     public static void main(String[] args) {
-        if (args.length < 2) return;
+        ChatClient client;
+        if (args.length < 2) {
+            client = new ChatClient();
+            client.execute();
+
+            return;
+        }
 
         String hostname = args[0];
         int port = Integer.parseInt(args[1]);
 
-        ChatClient client = new ChatClient(hostname, port);
+        client = new ChatClient(hostname, port);
         client.execute();
     }
 }
