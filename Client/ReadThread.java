@@ -17,10 +17,10 @@ public class ReadThread extends Thread {
             reader = new BufferedReader(new InputStreamReader(input));
         } catch (IOException ex) {
             System.out.println("Error getting input stream: " + ex.getMessage());
-            ex.printStackTrace();
         }
     }
 
+    @Override
     public void run() {
         while (true) {
             try {
@@ -28,11 +28,14 @@ public class ReadThread extends Thread {
                 System.out.println("\n" + response);
 
                 if (client.getUserName() != null) {
-                    System.out.print("[" + client.getUserName() + "]: ");
+                    System.out.print("[ " + client.getUserName() + " ]: ");
                 }
             } catch (IOException ex) {
-                System.out.println("Error reading from server: " + ex.getMessage());
-                ex.printStackTrace();
+                if(ex instanceof SocketException) {
+                    System.out.println("\nConnection Closed: " +ex.getMessage());
+                } else {
+                    System.out.println("\nError reading from server: " + ex.getMessage());
+                }
                 break;
             }
         }

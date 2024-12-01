@@ -17,22 +17,25 @@ public class WriteThread extends Thread {
             writer = new PrintWriter(output, true);
         } catch (IOException ex) {
             System.out.println("Error getting output stream: " + ex.getMessage());
-            ex.printStackTrace();
         }
     }
 
+    @Override
     public void run() {
         Console console = System.console();
 
-        String userName = console.readLine("\nEnter your name: ");
+        String userName = console.readLine("\nEnter your name: ").trim();
         client.setUserName(userName);
         writer.println(userName);
+        System.out.println();
 
         String text;
-
         do {
-            text = console.readLine("[" + userName + "]: ");
-            writer.println(text);
+            text = console.readLine("[ " + userName + " ]: ").trim();
+
+            if(!text.isEmpty()) {
+                writer.println(text);
+            }
 
         } while (!text.equals("bye"));
 
