@@ -21,6 +21,7 @@ public class UserThread extends Thread {
 
     @Override
     public void run() {
+        String userName = "";
         try {
             InputStream input = socket.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(input));
@@ -30,7 +31,7 @@ public class UserThread extends Thread {
 
             printUsers();
 
-            String userName = reader.readLine();
+            userName = reader.readLine();
             userNames.add(userName);
 
             String serverMessage = "New user connected: " + userName;
@@ -49,10 +50,24 @@ public class UserThread extends Thread {
 
             serverMessage = userName + " has quitted.";
             broadcast(serverMessage);
+        } catch (SocketException ex) {
+            logger.log(Level.SEVERE, "Connection reset", ex);
 
+            System.out.println("User "+ userName +" left");
+            removeUser(userName);
         } catch (IOException ex) {
             logger.log(Level.SEVERE, "IO Error Occured", ex);
             System.out.println("IO Error Occured: " + ex.getMessage());
+        } finally {
+            if (!userName.isEmpty()) {
+                removeUser(userName);
+            }
+
+            try {
+                socket.close();
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "Error closing socket", e);
+            }
         }
     }
 
