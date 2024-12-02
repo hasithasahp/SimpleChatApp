@@ -23,14 +23,12 @@ public class WriteThread extends Thread {
     @Override
     public void run() {
         Console console = System.console();
+        String userName = client.getUserName();
 
-        String userName = console.readLine("\nEnter your name: ").trim();
-        client.setUserName(userName);
-        writer.println(userName);
 
         String text;
         do {
-            text = console.readLine("[ "+ userName +" ]: ");
+            text = console.readLine("w[ "+ userName +" ]: ");
             
             if(text.trim().isEmpty()) continue;
             

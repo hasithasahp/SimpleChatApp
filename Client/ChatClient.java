@@ -7,6 +7,7 @@ public class ChatClient {
     private String hostname = "localhost";
     private int port = 5555;
     private String userName;
+    private boolean authenticated = false;
 
     public ChatClient() {}
 
@@ -19,6 +20,35 @@ public class ChatClient {
         try {
             Socket socket = new Socket(hostname, port);
 
+            // Create a writer to send authentication details
+            PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+            // Authenticate user
+            Console console = System.console();
+            String response;
+            boolean authenticated = false;
+            while(!authenticated) {
+                System.out.println(reader.readLine()); // "Enter your username: "
+                String userName = console.readLine().trim();
+                writer.println(userName);
+
+                System.out.println(reader.readLine()); // "Enter your password: "
+                String password = console.readLine().trim();
+                writer.println(password);
+
+                response = reader.readLine();
+                if ("Authentication failed".equals(response)) {
+                    System.out.println("Authentication failed. Please try again.");
+                    socket.close();
+                    return;
+                } else if ("Authentication successful".equals(response)) {
+                    System.out.println("Authentication successful. Welcome!");
+                    this.userName = userName;
+                    authenticated = true;
+                }
+            }
+            
             new ReadThread(socket, this).start();
             new WriteThread(socket, this).start();
 
@@ -27,6 +57,14 @@ public class ChatClient {
         } catch (IOException ex) {
             System.out.println("I/O Error: " + ex.getMessage());
         }
+    }
+
+    boolean isAuthenticated() {
+        return this.authenticated;
+    }
+
+    void setAuthenticated() {
+        this.authenticated = true;
     }
 
     void setUserName(String userName) {

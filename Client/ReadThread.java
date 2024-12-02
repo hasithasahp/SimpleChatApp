@@ -22,25 +22,17 @@ public class ReadThread extends Thread {
 
     @Override
     public void run() {
-        while (true) {
-            try {
-                String response = reader.readLine().trim();
-                if(response.isEmpty()) continue;
-
-                // Erase the current line and move to the beginning
-                System.out.print("\r");
-                System.out.println(response);
-
-                if (client.getUserName() != null) {
-                    System.out.print("[ " + client.getUserName() + " ]: ");
-                }
-            } catch (IOException ex) {
-                if(ex instanceof SocketException) {
-                    System.out.println("\nConnection Closed: " + ex.getMessage());
-                } else {
-                    System.out.println("\nError reading from server: " + ex.getMessage());
-                }
-                break;
+        try {
+            String response;
+            while((response = reader.readLine()) != null) {
+                System.out.println("\r"+response);
+                System.out.print("R[ " + client.getUserName() + " ]: ");
+            }
+        } catch (IOException ex) {
+            if(ex instanceof SocketException) {
+                System.out.println("\nConnection Closed: " + ex.getMessage());
+            } else {
+                System.out.println("\nError reading from server: " + ex.getMessage());
             }
         }
     }
