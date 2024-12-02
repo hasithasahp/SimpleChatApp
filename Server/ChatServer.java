@@ -9,6 +9,7 @@ public class ChatServer {
     private static final Set<String> userNames = new HashSet<>();
     private static final Set<UserThread> userThreads = new HashSet<>();
     private static final Logger logger = Logger.getLogger(ChatServer.class.getName());
+    private static final Map<String, String> userCredentials = new HashMap<>();
 
     private static void init_logger() {
         try {
@@ -31,10 +32,17 @@ public class ChatServer {
         }
     }
 
+    private static void init_user_credentials() {
+        userCredentials.put("user1", "pass1");
+        userCredentials.put("user2", "pass2");
+        userCredentials.put("user3", "pass3");
+    }
+
     public static void main(String[] args) {
         int port = 5555;
 
         init_logger();
+        init_user_credentials();
 
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             String serverMsg = "Server Started! listening on PORT:" + port;
@@ -45,7 +53,7 @@ public class ChatServer {
                 Socket socket = serverSocket.accept();
                 System.out.println("["+ socket.getInetAddress().getHostAddress() + ":" + socket.getPort() +"] New user connected");
 
-                UserThread newUser = new UserThread(socket, userNames, userThreads, logger);
+                UserThread newUser = new UserThread(socket, userNames, userThreads, logger, userCredentials);
                 userThreads.add(newUser);
                 newUser.start();
             }

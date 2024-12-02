@@ -11,12 +11,14 @@ public class UserThread extends Thread {
     private final Set<String> userNames;
     private final Set<UserThread> userThreads;
     private final Logger logger;
+    private final Map<String, String> userCredentials;
 
-    public UserThread(Socket socket, Set<String> userNames, Set<UserThread> userThreads, Logger logger) {
+    public UserThread(Socket socket, Set<String> userNames, Set<UserThread> userThreads, Logger logger, Map<String, String> userCredentials) {
         this.socket = socket;
         this.userNames = userNames;
         this.userThreads = userThreads;
         this.logger = logger;
+        this.userCredentials = userCredentials;
     }
 
     @Override
@@ -29,10 +31,34 @@ public class UserThread extends Thread {
             OutputStream output = socket.getOutputStream();
             writer = new PrintWriter(output, true);
 
-            printUsers();
+            boolean authenticated = false;
+            while(!authenticated) {
+                writer.println("Enter your username: ");
+                userName = reader.readLine().trim();
+    
+                writer.println("Enter your password: ");
+                String password = reader.readLine().trim();
+    
+                if(!authenticate(userName, password)) {
+                    writer.println("Authentication failed");
+                } else {
+                    writer.println("Authentication successful");
+                    authenticated = true;
+                }
+            }
 
-            userName = reader.readLine().trim();
-            userNames.add(userName);
+            synchronized (userName) {
+                if (userNames.contains(userName)) {
+                    writer.println("Username already taken. Connection closing.");
+                    socket.close();
+
+                    return;
+                }
+
+                userNames.add(userName);
+            }
+
+            printUsers();
 
             String serverMessage = "\nNew user connected: " + userName + "\n";
             broadcast(serverMessage);
@@ -44,16 +70,12 @@ public class UserThread extends Thread {
 
                 clientMessage = clientMessage.trim();
                 if(!clientMessage.isEmpty()) {
-                    serverMessage = "[ " + userName + " ]: " + clientMessage;
+                    serverMessage = "S[ " + userName + " ]: " + clientMessage;
                     broadcast(serverMessage);
                 }
             } while (!clientMessage.equals("bye"));
 
             removeUser(userName);
-            socket.close();
-
-            serverMessage = userName + " has quitted.";
-            broadcast(serverMessage);
         } catch (SocketException ex) {
             logger.log(Level.SEVERE, "Connection reset", ex);
 
@@ -76,7 +98,12 @@ public class UserThread extends Thread {
         }
     }
 
-    void printUsers() {
+    private boolean authenticate(String userName, String password) {
+        String storedPassword = userCredentials.get(userName);
+        return storedPassword != null && storedPassword.equals(password);
+    }
+
+    private void printUsers() {
         if (userNames.isEmpty()) {
             writer.println("No other users connected");
         } else {
@@ -84,7 +111,7 @@ public class UserThread extends Thread {
         }
     }
 
-    void broadcast(String message) {
+    private void broadcast(String message) {
         for (UserThread aUser : userThreads) {
             if(aUser == this) continue;
 
@@ -92,8 +119,11 @@ public class UserThread extends Thread {
         }
     }
 
-    void removeUser(String userName) {
-        userNames.remove(userName);
+    private void removeUser(String userName) {
+        synchronized (userNames) {
+            userNames.remove(userName);
+        }
         userThreads.remove(this);
+        broadcast(userName + " has left.");
     }
 }
